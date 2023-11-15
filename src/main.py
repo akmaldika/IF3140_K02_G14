@@ -1,3 +1,6 @@
+from utils.Parser import constructSchedule
+from model.Schedule import Schedule
+from datetime import datetime
 
 if __name__ == "__main__":
   print("== Select concurrency control to be Implemented ==")
@@ -14,6 +17,16 @@ if __name__ == "__main__":
     except:
       print("Invalid input detected. Make sure you input the right thing!")
   
-  print("Insert a transaction:")
-  transaction = input()
-  print(transaction)
+  print()
+  print("Insert a schedule:")
+  print("e.g.: R-1(x); R-2(y); W-4(z)")
+  scheduleInput = input()
+  schedule = constructSchedule(scheduleInput)
+  
+
+  # # Hanya untuk testing
+  # schedule.dataItemArr[0].rts = datetime(2022, 12, 28, 23, 55, 59, 342380)
+  # schedule.displaySchedule()
+  
+
+  
