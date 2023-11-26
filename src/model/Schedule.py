@@ -32,11 +32,16 @@ class Schedule:
     for i in self.transactionArr:
       i.displayTransaction()
     print()
+
+  def printSchedule(self):
+    # print("Schedule: ", end="")
+    for i in self.operationArr:
+      print(i.opName + "; ", end="")
+    print()
+  
+  def dequeue(self) -> Operation:
+    return self.operationArr.pop(0) 
+  
+  
     
-    
-
-    
-
-
-
 

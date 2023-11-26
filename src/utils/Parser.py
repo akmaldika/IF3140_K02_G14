@@ -49,15 +49,18 @@ def constructSchedule(sched: str) -> Schedule:
 def parseOperation(op: str) -> list:
   temp = op.split("-")
   opType = temp[0]
+  if "(" in temp[1]:
+    nextTemp = temp[1].split("(")
+    opTransaction = nextTemp[0]
 
-  nextTemp = temp[1].split("(")
-  opTransaction = nextTemp[0]
-
-  if (len(nextTemp) > 1):
-    # there is Data Item : e.g. R-1(x)
-    opDataItem = nextTemp[1].replace(")", "")
-  else :
-    # there is no Data Item : e.g. C-1
+    if (len(nextTemp) > 1):
+      # there is Data Item : e.g. R-1(x)
+      opDataItem = nextTemp[1].replace(")", "")
+    else :
+      # there is no Data Item : e.g. C-1
+      opDataItem = None
+  else:
+    opTransaction = temp[1]
     opDataItem = None
   return [opType, opTransaction, opDataItem]
 
