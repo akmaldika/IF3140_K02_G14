@@ -144,6 +144,7 @@ class TwoPL(Schedule):
   def run(self):
     print()
     while (len(self.operationArr) != 0) or (len(self.waitingList) != 0):
+      self.prevWaitingList = self.waitingList.copy()
       # if the schedule already empty but the waiting list is not
       if (len(self.operationArr) == 0) and (len(self.waitingList) != 0):
         if self.waitingList == self.prevWaitingList:
