@@ -66,12 +66,9 @@ class TwoPL(Schedule):
     if self.hasSharedLock(op):
       return False
     # cek apakah upgrade
-      self.displayLock()
-    if (sLock in self.lockTable):
+    if (self.isInTableLock(sLock)):
       # remove shared lock
-      self.displayLock()
-      self.lockTable.remove(sLock)
-      self.displayLock()
+      self.lockTable = [lock for lock in self.lockTable if lock.opTransaction != op.opTransaction]
     # set lock
     self.lockTable.append(xLock)
     self.result.append(xLock)
