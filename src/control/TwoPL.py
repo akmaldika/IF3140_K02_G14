@@ -1,6 +1,5 @@
 from model.Schedule import Schedule
 from model.Operation import Operation
-from model.DataItem import DataItem
 
 class TwoPL(Schedule):
   # Waiting queue
@@ -68,7 +67,9 @@ class TwoPL(Schedule):
     # cek apakah upgrade
     if (self.isInTableLock(sLock)):
       # remove shared lock
-      self.lockTable = [lock for lock in self.lockTable if lock.opTransaction != op.opTransaction]
+      for lock in self.lockTable:
+        if (lock.opDataItem.name == sLock.opDataItem.name):
+          self.lockTable.remove(lock)
     # set lock
     self.lockTable.append(xLock)
     self.result.append(xLock)
@@ -118,6 +119,7 @@ class TwoPL(Schedule):
         if type(isSuccess) != bool:
           self.result += isSuccess
       else:
+        self.prevWaitingList = self.waitingList.copy()
         self.waitingList.append(currOp)
       self.display(currOp)
     else:
@@ -128,6 +130,14 @@ class TwoPL(Schedule):
         self.waitingList.pop(0)
         self.display(currOp)
     return isSuccess
+
+  def isTscInWaitingList(self, currOp: Operation):
+    for op in self.waitingList:
+      if op.opTransaction == currOp.opTransaction:
+        self.prevWaitingList = self.waitingList.copy()
+        self.waitingList.append(currOp)
+        return True
+    
 
 # W-1(X); W-2(Y); W-1(Y); W-2(X); C-1; C-2 -> deadlock
 # R-1(X); R-2(X); W-2(Y); W-3(Y); W-1(X); C-1; C-2; C-3
@@ -143,7 +153,9 @@ class TwoPL(Schedule):
       isSuccess = True
       while (isSuccess and len(self.waitingList) != 0):
         isSuccess = self.process(self.waitingList[0], True)
-        self.prevWaitingList = self.waitingList
+      
       # process schedule
-      currOp= self.dequeue()
-      self.process(currOp, False)
+      if (len(self.operationArr) != 0):
+        currOp= self.dequeue()
+        if (not self.isTscInWaitingList(currOp)):
+          self.process(currOp, False)
