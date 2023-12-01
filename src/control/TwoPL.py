@@ -4,7 +4,6 @@ from model.Operation import Operation
 class TwoPL(Schedule):
   # Waiting queue
   waitingList: list[Operation] = list()
-  prevWaitingList: list[Operation] = list()
   # Final schedule
   result: list[Operation] = list()
   lockTable: list[Operation] = list()
@@ -37,7 +36,7 @@ class TwoPL(Schedule):
     print("Result : ", end="")
     self.displayResult()
     print()
-      
+    
   def setSLock(self, op: Operation) -> bool:
     sLock = Operation("SL", op.opTransaction, op.opDataItem)
     xLock = Operation("XL", op.opTransaction, op.opDataItem)
@@ -81,12 +80,7 @@ class TwoPL(Schedule):
       if w.opTransaction == op.opTransaction and w.opType != op.opType:
         return False
     # remove lock
-    unlock = []
-    for lock in self.lockTable:
-      if lock.opTransaction == op.opTransaction:
-        unlock.append(Operation("UL", lock.opTransaction, lock.opDataItem))
-    self.lockTable = [lock for lock in self.lockTable if lock.opTransaction != op.opTransaction]
-    return unlock
+    return self.unlock(op.opTransaction)
     
   def hasExclusiveLock(self, lock: Operation) -> bool:
     for l in self.lockTable:
@@ -119,7 +113,6 @@ class TwoPL(Schedule):
         if type(isSuccess) != bool:
           self.result += isSuccess
       else:
-        self.prevWaitingList = self.waitingList.copy()
         self.waitingList.append(currOp)
       self.display(currOp)
     else:
@@ -129,31 +122,65 @@ class TwoPL(Schedule):
           self.result += isSuccess
         self.waitingList.pop(0)
         self.display(currOp)
+    # self.display(currOp)
     return isSuccess
 
   def isTscInWaitingList(self, currOp: Operation):
     for op in self.waitingList:
       if op.opTransaction == currOp.opTransaction:
-        self.prevWaitingList = self.waitingList.copy()
         self.waitingList.append(currOp)
         return True
-    
+  
+  def unlock(self, opTransaction):
+    unlock = []
+    for lock in self.lockTable:
+      if lock.opTransaction == opTransaction:
+        unlock.append(Operation("UL", lock.opTransaction, lock.opDataItem))
+    self.lockTable = [lock for lock in self.lockTable if lock.opTransaction != opTransaction]
+    return unlock
+  
+  def rollback(self, currOp: Operation):
+    # currOp = self.waitingList[0]
+    tsc = currOp.opTransaction
+    # periksa siapa yang harus di rollback
+    for w in self.lockTable:
+      if w.opDataItem == currOp.opDataItem:
+        if (w.opTransaction > tsc):
+          tsc = w.opTransaction
+    self.result.append(Operation("A", tsc, None))
 
-# W-1(X); W-2(Y); W-1(Y); W-2(X); C-1; C-2 -> deadlock
-# R-1(X); R-2(X); W-2(Y); W-3(Y); W-1(X); C-1; C-2; C-3
+    # rearrange waiting list 
+    temp = []
+    for op in self.waitingList[:]:
+      if op.opTransaction == tsc:
+          temp.append(op)
+          self.waitingList.remove(op)
+    for op in self.result:
+      if op.opType in ["W", "R"] and op.opTransaction == tsc:
+        self.waitingList.append(op)
+    self.waitingList += temp
+
+    # unlock semua lock punya tsc
+    self.result += self.unlock(tsc)
+    self.operationArr = self.waitingList.copy()
+    self.waitingList.clear()
+    self.display(currOp)
+
+# W-1(X); W-2(Y); W-1(Y); W-2(X); C-1; C-2
+# R-1(X); W-2(X); W-2(Y); W-3(Y); W-1(X); C-1; C-2; C-3;
+# R-1(B);R-2(B);R-2(A);W-1(B);R-1(A);C-1;W-2(B);W-2(A);C-2
   def run(self):
     print()
     while (len(self.operationArr) != 0) or (len(self.waitingList) != 0):
-      self.prevWaitingList = self.waitingList.copy()
-      # if the schedule already empty but the waiting list is not
-      if (len(self.operationArr) == 0) and (len(self.waitingList) != 0):
-        if self.waitingList == self.prevWaitingList:
-          print("deadlock detected")
-          break
       # process the waiting list first
       isSuccess = True
       while (isSuccess and len(self.waitingList) != 0):
         isSuccess = self.process(self.waitingList[0], True)
+
+      # if the schedule already empty but the waiting list is not
+      if (len(self.operationArr) == 0) and (len(self.waitingList) != 0):
+        print("deadlock detected")
+        self.rollback(self.waitingList[0])
       
       # process schedule
       if (len(self.operationArr) != 0):
