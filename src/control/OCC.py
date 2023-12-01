@@ -7,17 +7,23 @@ from utils.Printer import *
 
 
 class OCC(Schedule):
+    final_schedule: list[Operation] = list()
     def __init__(self, schedule: Schedule):
         super().__init__(schedule.operationArr, schedule.dataItemArr, schedule.transactionArr)
         self.final_schedule = []
         self.run() 
 
-    def get_Transaction(self, id: str):
+    def get_transaction(self, id: str):
         for transaction in self.transactionArr:
             if transaction.id == id:
                 return transaction
+            
+    def run_transaction(self, id: str):
+        for operation in self.operationArr:
+            if operation.opTransaction == id:
+                self.execute_operation(operation)
 
-    def validate(self, t: Transaction):
+    def validate(self, t: Transaction) -> bool:
         valid = True
         for transaction in self.transactionArr:      
             if (transaction.validationTS < t.validationTS):
@@ -31,14 +37,13 @@ class OCC(Schedule):
         return valid
 
     def execute_operation(self, operation: Operation):
-        transaction = self.get_Transaction(operation.opTransaction)
+        transaction = self.get_transaction(operation.opTransaction)
         transaction.addToSet(operation)
         description = []
         if operation.opType == "R":
             self.final_schedule.append(operation)
             description.append(f"Read Set : {transaction.getReadSet()}")
             print_process(operation.opType, operation.opTransaction, operation.opDataItem.name, description)
-            self.final_schedule.append(operation)
 
         elif operation.opType == "W":
             self.final_schedule.append(Operation("TW", transaction.id, operation.opDataItem))
@@ -57,25 +62,21 @@ class OCC(Schedule):
                     self.final_schedule.append(Operation("W", transaction.id, item))
 
                 print_process(operation.opType, transaction.id, "", [])
-                transaction.markFinishTS()
                 self.final_schedule.append(operation)
+                transaction.markFinishTS()
             else :
                 self.final_schedule.append(Operation("A", transaction.id, None))
                 print_process("Abort", operation.opTransaction, "", [f"T{transaction.id} rolled back"])
                 transaction.abort()
-                self.run_all(transaction.id)
+                self.run_transaction(transaction.id)
             return
 
         if transaction.startTS == datetime.max:
             transaction.markStartTS()
 
     def run(self):
+        print_header()
         for operation in self.operationArr:
             self.execute_operation(operation)   
         
-        print(self.final_schedule)
-
-    def run_all(self, transactionID: str):
-        for operation in self.operationArr:
-            if operation.opTransaction == transactionID:
-                self.execute_operation(operation)
+        print_result(self.final_schedule)
