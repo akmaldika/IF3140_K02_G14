@@ -43,7 +43,7 @@ def constructSchedule(sched: str) -> Schedule:
         operation = Operation(currentOpType, currentOpTransaction, tempDataItem)
         operationArr.append(operation)
 
-    schedule = Schedule(operationArr, dataItemArr, transactionArr)
+    schedule = Schedule(operationArr, sorted(dataItemArr, key=lambda x:x.name), sorted(transactionArr, key=lambda x: x.id))
     return schedule
 
 def parseOperation(op: str) -> list:
