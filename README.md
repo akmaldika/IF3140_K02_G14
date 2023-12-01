@@ -10,12 +10,11 @@
 * [Authors](#authors)
 
 ## **Program Description**
-The program is a simulation for Concurrency Control in DBMS. The methods are 2PL, OCC, and MVCC. The input is a schedule of transactions and the output will be a final scheduled ordered by the system.
+The project is a simulation of Concurrency Control mechanisms in a Database Management System (DBMS), featuring the Two-Phase Locking (2PL), Optimistic Concurrency Control (OCC), and Multiversion Concurrency Control (MVCC) methods. The input consists of transaction schedules, and the output is a finalized schedule arranged by the system.
 
 ## **Required Program**
-| Required Programs |
-|-------------------|
-|    Python         |
+- [Python](https://www.python.org/): The programming language used for implementing concurrency control protocols and other aspects of the project.
+- [PostgreSQL](https://www.postgresql.org/): The database management system used for the project.
 
 
 ## **How to Run The Program**
