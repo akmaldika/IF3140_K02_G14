@@ -38,7 +38,6 @@ class OCC(Schedule):
             self.final_schedule.append(operation)
             description.append(f"Read Set : {transaction.getReadSet()}")
             print_process(operation.opType, operation.opTransaction, operation.opDataItem.name, description)
-            self.final_schedule.append(operation)
 
         elif operation.opType == "W":
             self.final_schedule.append(Operation("TW", transaction.id, operation.opDataItem))
@@ -70,10 +69,11 @@ class OCC(Schedule):
             transaction.markStartTS()
 
     def run(self):
+        print_header()
         for operation in self.operationArr:
             self.execute_operation(operation)   
         
-        print(self.final_schedule)
+        print_result(self.final_schedule)
 
     def run_all(self, transactionID: str):
         for operation in self.operationArr:

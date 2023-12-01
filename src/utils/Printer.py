@@ -39,4 +39,4 @@ def print_header():
 def print_result(result: list[Operation]):
     print("Result: ")
     for i in result:
-      print(i.getNameString() + "; ", end="")
+      print(i.opName + "; ", end="")
