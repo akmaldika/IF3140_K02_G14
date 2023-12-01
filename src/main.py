@@ -2,6 +2,8 @@ from utils.Parser import constructSchedule
 from model.Schedule import Schedule
 from datetime import datetime
 from control.TwoPL import TwoPL
+from control.OCC import OCC
+
 
 if __name__ == "__main__":
   print("== Select concurrency control to be Implemented ==")
@@ -9,7 +11,7 @@ if __name__ == "__main__":
   print("2. Optimistic Concurrency Control (OCC)")
   print("3. Multiversion Timestamp Ordering Concurrency Control (MVCC)")
 
-  userInput = 1
+  userInput = 0
   while (userInput != 1 and userInput != 2 and userInput !=3):
     try:
       userInput = int(input("Choose an option: "))
@@ -26,7 +28,9 @@ if __name__ == "__main__":
   
   match userInput:
     case 1:
-      TwoPL(schedule)
+      TwoPL(schedule) 
+    case 2:
+      OCC(schedule)
 
   # # Hanya untuk testing
   # schedule.dataItemArr[0].rts = datetime(2022, 12, 28, 23, 55, 59, 342380)

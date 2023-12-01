@@ -17,3 +17,6 @@ class DataItem:
     print("  " * indent + "| Data Item Name :", self.name)
     print("  " * indent + "| Read Time Stamp :", self.rts)
     print("  " * indent + "| Write Time Stamp :", self.wts)
+
+  def __str__(self):
+        return str(self.name)

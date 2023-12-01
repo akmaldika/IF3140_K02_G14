@@ -35,3 +35,6 @@ class Operation:
        print("{")
        self.opDataItem.displayDataItem(1) if self.opDataItem != None else print("  " * (indent+1) + "| None")
        print("}")
+
+    def getNameString(self):
+       return str(self.opName) + "-" + self.opTransaction + "(" + self.opDataItem.name + ")"
