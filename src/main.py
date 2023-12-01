@@ -3,6 +3,7 @@ from model.Schedule import Schedule
 from datetime import datetime
 from control.TwoPL import TwoPL
 from control.OCC import OCC
+from control.MVCC import MVCC
 
 
 if __name__ == "__main__":
@@ -31,6 +32,8 @@ if __name__ == "__main__":
       TwoPL(schedule) 
     case 2:
       OCC(schedule)
+    case 3:
+      MVCC(schedule)
 
   # # Hanya untuk testing
   # schedule.dataItemArr[0].rts = datetime(2022, 12, 28, 23, 55, 59, 342380)
